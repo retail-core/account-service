@@ -1,13 +1,15 @@
-using AccountService.Core.Interfaces;
-using AccountService.Core.Services;
-using AccountService.Data;
-using AccountService.Data.Repositories;
+using AccountService.API.Data;
+using AccountService.API.Data.Repositories;
 using Microsoft.EntityFrameworkCore;
 using MassTransit;
-using AccountService.Messaging.Consumer;
-using AccountService.Core.Entities;
-
+using AccountService.API.Messaging.Consumer;
+using Serilog;
+using AccountService.API.Endpoints;
+using AccountService.API.Services;
+using AccountService.API.Handlers;
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((context, config) => config.ReadFrom.Configuration(context.Configuration));
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Postgres")));
@@ -31,29 +33,32 @@ builder.Services.AddMassTransit(x =>
                 s.ExchangeType = "topic";
             });
         });
+
+        var logger = context.GetRequiredService<ILogger<Program>>();
+        logger.LogInformation("Connected to RabbitMQ at {Host}", builder.Configuration.GetConnectionString("RabbitMQ"));
     });
 });
 
-builder.Services.AddScoped<IBaseRepository<Business>, BusinessRepository>();
+builder.Services.AddScoped<IBusinessRepository, BusinessRepository>();
+builder.Services.AddScoped<IStoreRepository, StoreRepository>();
 builder.Services.AddScoped<IBusinessService, BusinessService>();
-builder.Services.AddScoped<IBaseRepository<Store>, StoreRepository>();
 builder.Services.AddScoped<IStoreService, StoreService>();
+builder.Services.AddExceptionHandler<CustomExceptionHandler>();
 
 var app = builder.Build();
 
-app.MapGet("/status", () => Results.Ok("Ok"));
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
 
-app.Run();
+app.UseExceptionHandler(options => { });
+app.UseSerilogRequestLogging();
+app.MapStoreEndpoints();
+app.MapBusinessEndpoints();
+app.MapGet("/ping", () => Results.Ok("pong"));
 
-
-
-
-
-
-// if (app.Environment.IsDevelopment())
-// {
-//     app.UseSwagger();
-//     app.UseSwaggerUI();
-// }
-//builder.Services.AddSwaggerGen();
-// builder.Services.AddEndpointsApiExplorer();
+app.Run(
+    url: "http://+:8000"
+);

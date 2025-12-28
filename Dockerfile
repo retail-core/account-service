@@ -1,12 +1,12 @@
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
-WORKDIR /src
-COPY . .
-WORKDIR /src/src/AccountService.API
-RUN dotnet restore
-RUN dotnet publish -c Release -o /app/publish
-
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
+FROM golang:1.25.3-alpine AS builder
 WORKDIR /app
-COPY --from=build /app/publish .
+COPY . .
+RUN go mod download
+RUN go build -o account-service ./cmd/server
+
+FROM alpine:3.19
+WORKDIR /app
+COPY --from=builder /app/account-service .
+
 EXPOSE 8000
-ENTRYPOINT ["dotnet", "AccountService.API.dll"]
+CMD ["./account-service"]

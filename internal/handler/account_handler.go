@@ -265,3 +265,43 @@ func (h *AccountHandler) DeleteStaff(w http.ResponseWriter, r *http.Request) {
 	}
 	httpx.WriteJSON(w, http.StatusOK, response)
 }
+
+func (h *AccountHandler) EditStaff(w http.ResponseWriter, r *http.Request) {
+	storeIDParam := chi.URLParam(r, "store_id")
+	staffOIDParam := chi.URLParam(r, "staff_id")
+
+	storeID, err := uuid.FromString(storeIDParam)
+	if err != nil {
+		httpx.WriteError(w, errors.BadRequest("store_id must be valid UUID string"))
+		return
+	}
+
+	staffID, err := uuid.FromString(staffOIDParam)
+	if err != nil {
+		httpx.WriteError(w, errors.BadRequest("staff_id must be valid UUID string"))
+		return
+	}
+
+	var req dtos.EditStaffRequest
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		httpx.WriteError(w, errors.BadRequest("Invalid Request Body"))
+		return
+	}
+
+	if err := validation.ValidateStruct(req); err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+
+    error := h.Service.EditStaff(r.Context(), storeID, staffID, req)
+	if error != nil {
+		httpx.WriteError(w, error)
+		return
+	}
+
+	response := map[string]any{
+		"message": "Staff edited successfully",
+	}
+	httpx.WriteJSON(w, http.StatusOK, response)
+}

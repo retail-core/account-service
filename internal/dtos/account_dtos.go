@@ -20,3 +20,7 @@ type VerifyStaffEvent struct {
 	UserID uuid.UUID `json:"user_id"`
 }
 
+type EditStaffRequest struct {
+	Role *string `json:"role" validate:"omitempty"`
+	UserName *string `json:"username" validate:"omitempty"`
+}

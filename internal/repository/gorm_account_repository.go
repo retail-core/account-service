@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/gofrs/uuid"
+	"github.com/retail-core/account-service/internal/dtos"
 	appErrors "github.com/retail-core/account-service/internal/errors"
 	"github.com/retail-core/account-service/internal/models"
 	"gorm.io/gorm"
@@ -213,4 +214,26 @@ func (r *GormAccountRepository) DeleteStaff(ctx context.Context, storeID uuid.UU
 
 	return staff.UserID, nil
 
+}
+
+func (r *GormAccountRepository) EditStaff(ctx context.Context, storeID uuid.UUID, staffID uuid.UUID, req dtos.EditStaffRequest) error {
+	updates := make(map[string]interface{})
+
+	if req.Role != nil {
+		updates["role"] = *req.Role
+	}
+
+	if req.UserName != nil {
+		updates["user_name"] = *req.UserName
+	}
+
+	result := r.DB.WithContext(ctx).Model(&models.Staff{}).
+		Where("store_id = ? AND id = ?", storeID, staffID).
+		Updates(updates)
+
+	if result.Error != nil {
+		return fmt.Errorf("failed to edit staff: %w", result.Error)
+	}
+
+	return nil
 }

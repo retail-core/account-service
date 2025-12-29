@@ -22,5 +22,4 @@ type StaffResponse struct {
 	Email      string    `json:"email"`
 	Role       string    `json:"role"`
 	IsVerified bool      `json:"is_verified"`
-
 }

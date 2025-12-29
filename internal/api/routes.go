@@ -40,6 +40,7 @@ func ConfigureRoutes(database *gorm.DB, rabbitConn *mq.RabbitMQConnection) http.
 		v1.Get("/stores/{store_id}/staffs", accountHandler.GetStaffsByStoreID)
 		v1.Post("/users/{user_id}/onboard", accountHandler.OnboardUser)
 		v1.Delete("/stores/{store_id}/staffs/{staff_id}", accountHandler.DeleteStaff)
+		v1.Patch("/stores/{store_id}/staffs/{staff_id}", accountHandler.EditStaff)
 	})
 
 	return r

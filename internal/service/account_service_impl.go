@@ -247,3 +247,16 @@ func (s *AccountServiceImpl) DeleteStaff(ctx context.Context, storeID uuid.UUID,
 
 	return nil
 }
+
+func (s *AccountServiceImpl) EditStaff(ctx context.Context, storeID uuid.UUID, staffID uuid.UUID, req dtos.EditStaffRequest) error {
+
+	err := s.Repo.EditStaff(ctx, storeID, staffID, req)
+
+	if err != nil {
+		logger.L().Error("Failed to edit staff", zap.Error(err))
+		return err
+	}
+
+	return nil
+
+}

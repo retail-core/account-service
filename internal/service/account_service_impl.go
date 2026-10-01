@@ -177,6 +177,16 @@ func (s *AccountServiceImpl) GetStaffsByStoreID(ctx context.Context, storeID uui
 	return staffs, nil
 }
 
+func (s *AccountServiceImpl) GetStaffsByUserID(ctx context.Context, userID uuid.UUID) ([]models.Staff, error) {
+	staffs, err := s.Repo.GetStaffsByUserID(ctx, userID)
+	if err != nil {
+		logger.L().Error("Failed to fetch staffs for store", zap.Error(err))
+		return nil, err
+	}
+
+	return staffs, nil
+}
+
 func (s *AccountServiceImpl) VerifyStaff(ctx context.Context, userID uuid.UUID) error {
 	if err := s.Repo.VerifyStaff(ctx, userID); err != nil {
 		logger.L().Error("Failed to fetch staff for verification", zap.Error(err))

@@ -305,3 +305,34 @@ func (h *AccountHandler) EditStaff(w http.ResponseWriter, r *http.Request) {
 	}
 	httpx.WriteJSON(w, http.StatusOK, response)
 }
+
+func (h *AccountHandler) GetStaffsByUserID(w http.ResponseWriter, r *http.Request) {
+	userIDParam := chi.URLParam(r, "user_id")
+
+	userID, err := uuid.FromString(userIDParam)
+	if err != nil {
+		httpx.WriteError(w, errors.BadRequest("user_id must be valid UUID string"))
+		return
+	}
+
+	staffs, err := h.Service.GetStaffsByUserID(r.Context(), userID)
+	if err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+
+	var res = make([]dtos.StaffResponse, 0, len(staffs))
+
+	for _, staff := range staffs {
+		res = append(res, dtos.StaffResponse{
+			Id:         staff.ID,
+			StoreID:    staff.StoreID,
+			Username:   staff.UserName,
+			Email:      staff.Email,
+			Role:       *staff.Role,
+			IsVerified: staff.IsVerified,
+		})
+	}
+
+	httpx.WriteJSON(w, http.StatusOK, res)
+}

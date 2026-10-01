@@ -29,7 +29,9 @@ type AccountRepository interface {
 
 	GetUsersByStoreID(ctx context.Context, storeID uuid.UUID) ([]uuid.UUID, error)
 
-	GetStaffsByStoreID(ctx context.Context, storeID uuid.UUID) ([]models.Staff, error)
+	GetStaffsByStoreID(ctx context.Context, storeID uuid.UUID) ([]models.Staff, error) // DEPRECIATED NOT USED
+
+	GetStaffsByUserID(ctx context.Context, storeID uuid.UUID) ([]models.Staff, error)
 
 	VerifyStaff(ctx context.Context, userID uuid.UUID) error
 

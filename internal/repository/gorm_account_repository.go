@@ -125,7 +125,7 @@ func (r *GormAccountRepository) GetUsersByStoreID(ctx context.Context, storeID u
 	userIDs = append(userIDs, store.Business.UserID) // add business owner user ID
 
 	for _, staff := range store.Staffs {
-		userIDs = append(userIDs, staff.ID)
+		userIDs = append(userIDs, staff.UserID)
 	}
 
 	return userIDs, nil
@@ -146,6 +146,25 @@ func (r *GormAccountRepository) GetStaffsByStoreID(ctx context.Context, storeID 
 		}
 
 		return nil, fmt.Errorf("failed to get staffs by store ID: %w", result.Error)
+	}
+	return staffs, nil
+}
+
+func (r *GormAccountRepository) GetStaffsByUserID(ctx context.Context, userID uuid.UUID) ([]models.Staff, error) {
+	var staffs []models.Staff
+
+	result := r.DB.WithContext(ctx).
+		Model(&models.Staff{}).
+		Joins("JOIN businesses ON businesses.id = staffs.business_id").
+		Where("businesses.user_id = ?", userID).
+		Preload("Store").
+		Find(&staffs)
+
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return []models.Staff{}, nil
+		}
+		return nil, fmt.Errorf("failed to get staffs by user ID: %w", result.Error)
 	}
 	return staffs, nil
 }

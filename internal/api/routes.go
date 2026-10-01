@@ -37,7 +37,8 @@ func ConfigureRoutes(database *gorm.DB, rabbitConn *mq.RabbitMQConnection) http.
 		v1.Put("/users/{user_id}/stores/{store_id}", accountHandler.UpdateStore)
 		v1.Post("/stores/{store_id}/staffs", accountHandler.CreateStaff)
 		v1.Get("/stores/{store_id}/users", accountHandler.GetUsersByStoreID)
-		v1.Get("/stores/{store_id}/staffs", accountHandler.GetStaffsByStoreID)
+		v1.Get("/stores/{store_id}/staffs", accountHandler.GetStaffsByStoreID) // DEPRECIATED. NOT IN USE
+		v1.Get("/users/{user_id}/staffs", accountHandler.GetStaffsByUserID)
 		v1.Post("/users/{user_id}/onboard", accountHandler.OnboardUser)
 		v1.Delete("/stores/{store_id}/staffs/{staff_id}", accountHandler.DeleteStaff)
 		v1.Patch("/stores/{store_id}/staffs/{staff_id}", accountHandler.EditStaff)

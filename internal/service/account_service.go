@@ -20,4 +20,5 @@ type AccountService interface {
 	OnboardUser(ctx context.Context, userID uuid.UUID, req dtos.BusinessOnboardingRequest) (*models.BusinessOnboarding, error)
 	DeleteStaff(ctx context.Context, storeID uuid.UUID, staffID uuid.UUID) error
 	EditStaff(ctx context.Context, storeID uuid.UUID, staffID uuid.UUID, req dtos.EditStaffRequest) error
+	GetStaffsByUserID(ctx context.Context, storeID uuid.UUID) ([]models.Staff, error)
 }
